@@ -5,10 +5,8 @@ See LICENSE for details
 package com.fsecure.lokki;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -25,37 +23,43 @@ import android.widget.TextView;
 import com.androidquery.AQuery;
 import com.fsecure.lokki.avatar.AvatarLoader;
 import com.fsecure.lokki.utils.ContactUtils;
-import com.fsecure.lokki.utils.DefaultContactUtils;
 import com.fsecure.lokki.utils.PreferenceUtils;
-import com.fsecure.lokki.utils.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 
-
 public class AddContactsFragment extends Fragment {
 
     private static final String TAG = "AddContacts";
     public static Set<String> emailsSelected;
+    private static Boolean cancelAsynTasks = false;
     private ContactUtils mContactUtils;
     private ArrayList<String> contactList;
     private AQuery aq;
-    private static Boolean cancelAsynTasks = false;
     private Context context;
     private AvatarLoader avatarLoader;
     private EditText inputSearch;
     private ArrayAdapter<String> adapter;
 
-    public AddContactsFragment(ContactUtils contactUtils) {
+    public static final AddContactsFragment newInstance(ContactUtils contactUtils) {
+        AddContactsFragment addContactsFragment = new AddContactsFragment();
+        addContactsFragment.setContactUtils(contactUtils);
+        return addContactsFragment;
+    }
+
+    public void setContactUtils(ContactUtils contactUtils) {
         mContactUtils = contactUtils;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstance) {
         emailsSelected = new HashSet<String>();
         contactList = new ArrayList<String>();
     }
@@ -77,7 +81,7 @@ public class AddContactsFragment extends Fragment {
 
         super.onActivityCreated(savedInstanceState);
         String[] loadingList = {"Loading..."};
-        aq.id(R.id.add_contacts_list_view).adapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, loadingList));
+        aq.id(R.id.add_contacts_list_view).adapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, loadingList));
         new getAllEmailAddressesAsync().execute();
 
         /**
@@ -110,7 +114,7 @@ public class AddContactsFragment extends Fragment {
 
         if (MainApplication.contacts != null) return true;
         String jsonData = PreferenceUtils.getValue(context, PreferenceUtils.KEY_CONTACTS);
-        if (!jsonData.equals(""))
+        if (!jsonData.isEmpty()) {
             try {
                 MainApplication.contacts = new JSONObject(jsonData);
                 MainApplication.mapping = MainApplication.contacts.getJSONObject("mapping");
@@ -119,80 +123,22 @@ public class AddContactsFragment extends Fragment {
             } catch (JSONException e) {
                 MainApplication.contacts = new JSONObject();
             }
+        }
         return false;
-    }
-
-    class prepareAdapterAsync extends AsyncTask<Void, Void, Boolean> {
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-
-            Log.e(TAG, "prepareAdapterAsync");
-
-            //defaultAvartar = BitmapFactory.decodeResource(getResources(), R.drawable.default_avatar);
-            getContactList();
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean contactsExist) {
-
-            if (isAdded()) {
-                Log.e(TAG, "prepareAdapterAsync - ContactList: " + contactList);
-                setListAdapter();
-            }
-            super.onPostExecute(contactsExist);
-        }
-    }
-
-    class getAllEmailAddressesAsync extends AsyncTask<Void, Void, JSONObject> {
-
-        @Override
-        protected JSONObject doInBackground(Void... params) {
-
-            try {
-                return mContactUtils.listContacts(context);
-
-            } catch(Exception ex) {
-                ex.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(JSONObject contactsResult) {
-
-            if (contactsResult != null && isAdded() && !cancelAsynTasks) {
-                Log.e(TAG, "Number of contacts: " + (contactsResult.length() - 1));
-                try {
-                    MainApplication.contacts = contactsResult;
-                    MainApplication.mapping = MainApplication.contacts.getJSONObject("mapping");
-                    PreferenceUtils.setValue(context, PreferenceUtils.KEY_CONTACTS, MainApplication.contacts.toString());
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                //Log.e(TAG, "existing contacts? " + existingContacts);
-                //if (!existingContacts)
-                    new prepareAdapterAsync().execute();
-            }
-            super.onPostExecute(MainApplication.contacts);
-        }
     }
 
     private void getContactList() {
 
-        contactList = new ArrayList<String>();
+        contactList = new ArrayList<>();
 
-        JSONArray keys = null;
-        keys = MainApplication.mapping.names();
+        JSONArray keys = MainApplication.mapping.names();
 
         if (keys == null) return;
         for (int i = 0; i < keys.length(); i++) {
             try {
                 contactList.add(keys.get(i).toString());
 
-            } catch(Exception ex) {
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
@@ -238,8 +184,7 @@ public class AddContactsFragment extends Fragment {
                     //holder.imageLoader = new LoadPhotoAsync(position, holder);
                     //holder.imageLoader.execute(contactName);
 
-                }
-                catch(Exception ex) {
+                } catch (Exception ex) {
                     ex.printStackTrace();
                 }
                 return convertView;
@@ -259,7 +204,63 @@ public class AddContactsFragment extends Fragment {
         int position;
     }
 
+    class prepareAdapterAsync extends AsyncTask<Void, Void, Boolean> {
 
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            Log.e(TAG, "prepareAdapterAsync");
+
+            //defaultAvartar = BitmapFactory.decodeResource(getResources(), R.drawable.default_avatar);
+            getContactList();
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean contactsExist) {
+
+            if (isAdded()) {
+                Log.e(TAG, "prepareAdapterAsync - ContactList: " + contactList);
+                setListAdapter();
+            }
+            super.onPostExecute(contactsExist);
+        }
+    }
+
+    class getAllEmailAddressesAsync extends AsyncTask<Void, Void, JSONObject> {
+
+        @Override
+        protected JSONObject doInBackground(Void... params) {
+
+            try {
+                return mContactUtils.listContacts(context);
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject contactsResult) {
+
+            if (contactsResult != null && isAdded() && !cancelAsynTasks) {
+                Log.e(TAG, "Number of contacts: " + (contactsResult.length() - 1));
+                try {
+                    MainApplication.contacts = contactsResult;
+                    MainApplication.mapping = MainApplication.contacts.getJSONObject("mapping");
+                    PreferenceUtils.setValue(context, PreferenceUtils.KEY_CONTACTS, MainApplication.contacts.toString());
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                //Log.e(TAG, "existing contacts? " + existingContacts);
+                //if (!existingContacts)
+                new prepareAdapterAsync().execute();
+            }
+            super.onPostExecute(MainApplication.contacts);
+        }
+    }
 
 
 }

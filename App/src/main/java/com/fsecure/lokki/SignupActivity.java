@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.View;
 
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxStatus;
@@ -39,7 +38,7 @@ public class SignupActivity extends ActionBarActivity {
             Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[]{GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE}, false, null, null, null, null);
             startActivityForResult(intent, REQUEST_CODE_EMAIL);
 
-        } catch(ActivityNotFoundException anf) {
+        } catch (ActivityNotFoundException anf) {
             // No problem. Simply don't do anything
         }
     }
@@ -59,13 +58,13 @@ public class SignupActivity extends ActionBarActivity {
             Log.e(TAG, "Get default account returned null. Nothing to do.");
     }
 
-    public void signup_click(View view) {
+    public void signup_click() {
 
         Log.e(TAG, "Button clicked");
         if (aq.id(R.id.email).getText() != null) {
             String accountName = aq.id(R.id.email).getText().toString();
             Log.e(TAG, "Email: " + accountName);
-            if (!accountName.equals("")) {
+            if (!accountName.isEmpty()) {
                 PreferenceUtils.setValue(this, PreferenceUtils.KEY_USER_ACCOUNT, accountName);
                 PreferenceUtils.setValue(this, PreferenceUtils.KEY_DEVICE_ID, Utils.getDeviceId());
                 MainApplication.userAccount = accountName;
@@ -81,15 +80,15 @@ public class SignupActivity extends ActionBarActivity {
         }
     }
 
-    public void signupCallback(String url, JSONObject json, AjaxStatus status){
+    public void signupCallback(JSONObject json, AjaxStatus status) {
         Log.e(TAG, "signupCallback");
 
-        if(json != null && status.getCode() == 200) {
+        if (json != null && status.getCode() == 200) {
             Log.e(TAG, "json response: " + json);
             String id = json.optString("id");
             String authorizationtoken = json.optString("authorizationtoken");
 
-            if (!id.equals("") && !authorizationtoken.equals("")) {
+            if (!id.isEmpty() && !authorizationtoken.isEmpty()) {
 
                 PreferenceUtils.setValue(this, PreferenceUtils.KEY_USER_ID, id);
                 PreferenceUtils.setValue(this, PreferenceUtils.KEY_AUTH_TOKEN, authorizationtoken);

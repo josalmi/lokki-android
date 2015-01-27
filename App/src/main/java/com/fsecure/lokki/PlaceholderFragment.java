@@ -17,9 +17,17 @@ public class PlaceholderFragment extends Fragment {
     private static final String ARG_SECTION_NUMBER = "section_number";
     private int sectionNumber;
 
-    public PlaceholderFragment(int sectionNumber) {
+    public static final PlaceholderFragment newInstance(int sectionNumber) {
+        PlaceholderFragment placeholderFragment = new PlaceholderFragment();
+        Bundle bundle = new Bundle();
+        bundle.putInt(ARG_SECTION_NUMBER, sectionNumber);
+        placeholderFragment.setArguments(bundle);
+        return placeholderFragment;
+    }
 
-        this.sectionNumber = sectionNumber;
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        this.sectionNumber = getArguments().getInt(ARG_SECTION_NUMBER);
     }
 
     @Override

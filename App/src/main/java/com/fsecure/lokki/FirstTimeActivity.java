@@ -4,10 +4,9 @@ See LICENSE for details
 */
 package com.fsecure.lokki;
 
-import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -57,8 +56,7 @@ public class FirstTimeActivity extends ActionBarActivity {
         if (!next) {
             getMenuInflater().inflate(R.menu.first_time_welcome, menu);
             actionBar.setTitle(R.string.welcome_title);
-        }
-        else {
+        } else {
             getMenuInflater().inflate(R.menu.first_time_terms, menu);
             actionBar.setTitle(R.string.terms_title);
         }

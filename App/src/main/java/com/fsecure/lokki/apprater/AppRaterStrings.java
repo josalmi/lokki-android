@@ -15,10 +15,10 @@ public class AppRaterStrings {
 
     private static Map<String, HashMap<String, String>> initialize() {
 
-        HashMap<String, HashMap<String, String>> result = new HashMap<String, HashMap<String, String>> ();
+        HashMap<String, HashMap<String, String>> result = new HashMap<>();
 
         // ENGLISH
-        HashMap<String, String> en = new HashMap<String, String>();
+        HashMap<String, String> en = new HashMap<>();
         en.put("give_us_feedback", "Give us feedback");
         en.put("do_you_like_this_app", "Do you like this app?");
         en.put("yes", "Yes");
@@ -35,7 +35,7 @@ public class AppRaterStrings {
         result.put("en", en);
         // -------------------------------------------------------------------
         // FINNISH
-        HashMap<String, String> fi = new HashMap<String, String>();
+        HashMap<String, String> fi = new HashMap<>();
         fi.put("give_us_feedback", "Lähetä palautetta");
         fi.put("do_you_like_this_app", "Pidätkö Lokki-sovelluksesta?");
         fi.put("yes", "Kyllä");
@@ -52,7 +52,7 @@ public class AppRaterStrings {
         result.put("fi", fi);
         // -------------------------------------------------------------------
         // RUSSIAN
-        HashMap<String, String> ru = new HashMap<String, String>();
+        HashMap<String, String> ru = new HashMap<>();
         ru.put("give_us_feedback", "Оцените Lokki");
         ru.put("do_you_like_this_app", "Вам нравится Lokki?");
         ru.put("yes", "Да");
@@ -69,7 +69,7 @@ public class AppRaterStrings {
         result.put("ru", ru);
         // -------------------------------------------------------------------
         // SWEDISH
-        HashMap<String, String> sv = new HashMap<String, String>();
+        HashMap<String, String> sv = new HashMap<>();
         sv.put("give_us_feedback", "Ge oss feedback");
         sv.put("do_you_like_this_app", "Gillar du Lokki-appen?");
         sv.put("yes", "Ja");

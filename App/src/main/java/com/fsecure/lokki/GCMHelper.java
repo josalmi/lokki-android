@@ -25,9 +25,8 @@ public class GCMHelper {
     public static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-
-    private static String SENDER_ID = "229584256615";
     private static final String TAG = "GCMHelper";
+    private static String SENDER_ID = "229584256615";
     private static GoogleCloudMessaging gcm;
     private static AtomicInteger msgId = new AtomicInteger();
     private static String regid;
@@ -90,20 +89,18 @@ public class GCMHelper {
             @Override
             protected String doInBackground(Void... params) {
 
-                String msg = "";
                 try {
                     if (gcm == null) {
                         gcm = GoogleCloudMessaging.getInstance(context);
                     }
                     regid = gcm.register(SENDER_ID);
-                    msg = "Device registered, registration ID = " + regid;
                     sendRegistrationIdToBackend(context);
                     storeRegistrationId(context, regid);
+                    return "Device registered, registration ID = " + regid;
 
                 } catch (IOException ex) {
-                    msg = "Error :" + ex.getMessage();
+                    return "Error :" + ex.getMessage();
                 }
-                return msg;
             }
 
             @Override
@@ -136,7 +133,7 @@ public class GCMHelper {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(PROPERTY_REG_ID, regId);
         editor.putInt(PROPERTY_APP_VERSION, appVersion);
-        editor.commit();
+        editor.apply();
     }
 
 }

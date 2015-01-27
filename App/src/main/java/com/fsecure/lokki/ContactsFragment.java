@@ -38,6 +38,7 @@ import java.util.Set;
 public class ContactsFragment extends Fragment {
 
     private static final String TAG = "Contacts";
+    private static Boolean cancelAsynTasks = false;
     RelativeLayout layout;
     ArrayList<String> peopleList;
     Set<String> iCanSee;
@@ -45,17 +46,16 @@ public class ContactsFragment extends Fragment {
     private HashMap<String, String> mapping;
     private HashMap<String, Long> timestamps;
     private AQuery aq;
-    private static Boolean cancelAsynTasks = false;
     private Context context;
     private AvatarLoader avatarLoader;
 
     public ContactsFragment() {
 
-        peopleList = new ArrayList<String>();
-        iCanSee = new HashSet<String>();
-        canSeeMe = new HashSet<String>();
-        mapping = new HashMap<String, String>();
-        timestamps = new HashMap<String, Long>();
+        peopleList = new ArrayList<>();
+        iCanSee = new HashSet<>();
+        canSeeMe = new HashSet<>();
+        mapping = new HashMap<>();
+        timestamps = new HashMap<>();
     }
 
     @Override
@@ -92,7 +92,7 @@ public class ContactsFragment extends Fragment {
                 Log.e(TAG, "I can see: " + email);
             }
 
-            for (int i=0; i < canSeeMeObj.length(); i++) {
+            for (int i = 0; i < canSeeMeObj.length(); i++) {
                 String key = canSeeMeObj.getString(i);
                 String email = (String) idMappingObj.get(key);
                 String name = Utils.getNameFromEmail(context, email);

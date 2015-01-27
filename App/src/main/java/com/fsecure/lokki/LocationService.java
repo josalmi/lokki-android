@@ -33,13 +33,8 @@ import org.json.JSONException;
 
 
 public class LocationService extends Service implements GooglePlayServicesClient.ConnectionCallbacks,
-                                                        GooglePlayServicesClient.OnConnectionFailedListener,
-                                                        LocationListener {
-
-    // INTERVALS
-    private static final long INTERVAL_10_MS = 10;
-    private static final long INTERVAL_30_SECS = 30 * 1000;
-    private static final long INTERVAL_1_MIN = 60 * 1000;
+        GooglePlayServicesClient.OnConnectionFailedListener,
+        LocationListener {
 
     // NOTIFICATIONS
     // - ERRORS
@@ -47,34 +42,32 @@ public class LocationService extends Service implements GooglePlayServicesClient
     public static final int ERROR_LOCATION_SERVICES_OFF_NOTIFICATION = 2002;
     public static final int ERROR_WIFI_OFF_NOTIFICATION = 2003;
     public static final int ERROR_NOTIFICATION = 2004;
-
     // - MESSAGES
     public static final int NOTIFICATION_NORMAL = 1001;
     public static final int NOTIFICATION_CHAT = 1002;
     public static final int NOTIFICATION_ALERT = 1003;
-
     // - SERVICE
     public static final int NOTIFICATION_SERVICE = 100;
-
-    // OTHER
-    private static String TAG = "LocationService";
+    // INTERVALS
+    private static final long INTERVAL_10_MS = 10;
+    private static final long INTERVAL_30_SECS = 30 * 1000;
+    private static final long INTERVAL_1_MIN = 60 * 1000;
     private static final String RUN_1_MIN = "RUN_1_MIN";
     private static final String ALARM_TIMER = "ALARM_TIMER";
-
+    public static Boolean serviceRunning = false;
+    public static Location lastLocation = null;
+    // OTHER
+    private static String TAG = "LocationService";
+    NotificationManager notificationManager;
     private LocationClient locationClient;
     private LocationRequest highAccuracyLocationRequest;
     private NotificationCompat.Builder notificationBuilder;
-    NotificationManager notificationManager;
-    public static Boolean serviceRunning = false;
     private Boolean locationClientConnected = false;
-    public static Location lastLocation = null;
-    private AlarmManager alarm;
-    private PendingIntent alarmCallback;
 
     //LocationAjaxCallback lcb;
     // ---------------------------------------------------
 
-    public static void start(Context context){
+    public static void start(Context context) {
 
         Log.e(TAG, "start Service called");
 
@@ -85,14 +78,14 @@ public class LocationService extends Service implements GooglePlayServicesClient
         context.startService(new Intent(context, LocationService.class));
     }
 
-    public static void stop(Context context){
+    public static void stop(Context context) {
 
         Log.e(TAG, "stop Service called");
         context.stopService(new Intent(context, LocationService.class));
     }
 
 
-    public static void run1min(Context context){
+    public static void run1min(Context context) {
 
 
         if (serviceRunning || !MainApplication.visible) return; // If service is running, stop
@@ -102,13 +95,37 @@ public class LocationService extends Service implements GooglePlayServicesClient
         context.startService(intent);
     }
 
+    // Check if GPS provider or Network provider are not enabled and prompts user to enable them
+    // Dialogs need to be called with a ACTIVITY context, otherwise they will throw an exception
+    public static Boolean checkLocationServices(Context context) { // Activity Context!!!
+
+        Log.i("LokkiLocationLibrary", "checkLocationServices called");
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+
+            Log.e("LokkiLocationLibrary", "Location services not enabled");
+            LokkiDialogs.showLocationServicesOFF(context);
+            return false;
+        }
+        // Separate wifi to a different notification
+        else if (!Utils.isWifiEnabled(context)) {
+
+            Log.e("LokkiLocationLibrary", "WIFI is OFF");
+            LokkiDialogs.showWifiOFF(context);
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public void onCreate() {
 
         Log.e(TAG, "onCreate");
         super.onCreate();
 
-        if (PreferenceUtils.getValue(this, PreferenceUtils.KEY_AUTH_TOKEN).equals("")) {
+        if (PreferenceUtils.getValue(this, PreferenceUtils.KEY_AUTH_TOKEN).isEmpty()) {
 
             Log.e(TAG, "User disabled reporting in App. Service not started.");
             stopSelf();
@@ -128,10 +145,10 @@ public class LocationService extends Service implements GooglePlayServicesClient
     }
 
     private void setTemporalTimer() {
-        alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
+        AlarmManager alarm = (AlarmManager) getSystemService(ALARM_SERVICE);
         Intent alarmIntent = new Intent(this, LocationService.class);
         alarmIntent.putExtra(ALARM_TIMER, 1);
-        alarmCallback = PendingIntent.getService(this, 0, alarmIntent, 0);
+        PendingIntent alarmCallback = PendingIntent.getService(this, 0, alarmIntent, 0);
         alarm.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + INTERVAL_1_MIN, alarmCallback);
         //alarm.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, INTERVAL_1_MIN, INTERVAL_30_MINS, alarmCallback);
         Log.e(TAG, "Time created.");
@@ -165,7 +182,7 @@ public class LocationService extends Service implements GooglePlayServicesClient
 
         Log.e(TAG, "onStartCommand invoked");
 
-        if (intent != null ) { // Check that intent isnt null, and service is connected to Google Play Services
+        if (intent != null) { // Check that intent isnt null, and service is connected to Google Play Services
             Bundle extras = intent.getExtras();
 
             if (extras != null && extras.containsKey(RUN_1_MIN)) {
@@ -203,8 +220,7 @@ public class LocationService extends Service implements GooglePlayServicesClient
     @Override
     public void onLocationChanged(Location location) {
 
-        Boolean highAccuracy = true;
-        Log.e(TAG, String.format("onLocationChanged - Accuracy: %s, Location: %s", highAccuracy, location));
+        Log.e(TAG, String.format("onLocationChanged - Location: %s", location));
         if (serviceRunning && locationClientConnected && location != null) {
 
             if (useNewLocation(location)) {
@@ -212,7 +228,7 @@ public class LocationService extends Service implements GooglePlayServicesClient
                 //sendData(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()), String.valueOf(location.getAccuracy()));
                 lastLocation = location;
                 //updateNotification();
-                DataService.updateDashboard(this, location);
+                DataService.updateDashboard(location);
                 Intent intent = new Intent("LOCATION-UPDATE");
                 intent.putExtra("current-location", 1);
                 LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
@@ -223,8 +239,7 @@ public class LocationService extends Service implements GooglePlayServicesClient
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            }
-            else
+            } else
                 Log.e(TAG, "New location discarded.");
 
             //updateNotification();
@@ -298,30 +313,6 @@ public class LocationService extends Service implements GooglePlayServicesClient
             return false;
         }
         Log.e(TAG, "Google Play Services is OK.");
-        return true;
-    }
-
-    // Check if GPS provider or Network provider are not enabled and prompts user to enable them
-    // Dialogs need to be called with a ACTIVITY context, otherwise they will throw an exception
-    public static Boolean checkLocationServices(Context context) { // Activity Context!!!
-
-        Log.i("LokkiLocationLibrary", "checkLocationServices called");
-        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-
-        if( !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)  ||
-                !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) ) {
-
-            Log.e("LokkiLocationLibrary", "Location services not enabled");
-            LokkiDialogs.showLocationServicesOFF(context);
-            return false;
-        }
-        // Separate wifi to a different notification
-        else if (!Utils.isWifiEnabled(context)) {
-
-            Log.e("LokkiLocationLibrary", "WIFI is OFF");
-            LokkiDialogs.showWifiOFF(context);
-            return false;
-        }
         return true;
     }
 

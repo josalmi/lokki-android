@@ -41,11 +41,11 @@ public class ServerAPI {
 
         String userAccount = PreferenceUtils.getValue(context, PreferenceUtils.KEY_USER_ACCOUNT);
         String deviceId = PreferenceUtils.getValue(context, PreferenceUtils.KEY_DEVICE_ID);
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<>();
         params.put("email", userAccount);
         params.put("device_id", deviceId);
 
-        if (!Utils.getLanguage().equals("")) {
+        if (!Utils.getLanguage().isEmpty()) {
             params.put("language", Utils.getLanguage());
         }
 
@@ -60,9 +60,9 @@ public class ServerAPI {
 
         String userId = PreferenceUtils.getValue(context, PreferenceUtils.KEY_USER_ID);
         String authorizationToken = PreferenceUtils.getValue(context, PreferenceUtils.KEY_AUTH_TOKEN);
-        String url = ApiUrl  + "user/" + userId + "/dashboard";
+        String url = ApiUrl + "user/" + userId + "/dashboard";
 
-        AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
+        AjaxCallback<JSONObject> cb = new AjaxCallback<>();
         cb.weakHandler(context, dashboardCallback);
         cb.header("authorizationtoken", authorizationToken);
         aq.ajax(url, JSONObject.class, cb);
@@ -75,9 +75,9 @@ public class ServerAPI {
 
         String userId = PreferenceUtils.getValue(context, PreferenceUtils.KEY_USER_ID);
         String authorizationToken = PreferenceUtils.getValue(context, PreferenceUtils.KEY_AUTH_TOKEN);
-        String url = ApiUrl  + "user/" + userId + "/places";
+        String url = ApiUrl + "user/" + userId + "/places";
 
-        AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
+        AjaxCallback<JSONObject> cb = new AjaxCallback<>();
         cb.weakHandler(context, placesCallback);
         cb.header("authorizationtoken", authorizationToken);
         aq.ajax(url, JSONObject.class, cb);
@@ -94,7 +94,7 @@ public class ServerAPI {
 
         JSONObject JSONdata = new JSONObject();
         JSONArray JSONemails = new JSONArray();
-        for (String email: emails) {
+        for (String email : emails) {
             JSONemails.put(email);
         }
         JSONdata.put("emails", JSONemails);
@@ -117,7 +117,7 @@ public class ServerAPI {
         aq.post(url, JSONdata, JSONObject.class, cb);
     }
 
-    public static void disallowUser(final Context context, String email) throws JSONException {
+    public static void disallowUser(final Context context, String email) {
 
         Log.e(TAG, "disallowUser");
         AQuery aq = new AQuery(context);
@@ -327,7 +327,7 @@ public class ServerAPI {
         aq.post(url, JSONdata, JSONObject.class, cb);
     }
 
-    public static void removePlace(final Context context, final String placeId) throws JSONException {
+    public static void removePlace(final Context context, final String placeId) {
 
         Log.e(TAG, "removePlace");
         AQuery aq = new AQuery(context);

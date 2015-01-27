@@ -4,17 +4,15 @@ See LICENSE for details
 */
 package com.fsecure.lokki;
 
-import android.support.v7.app.ActionBarActivity;;
 import android.app.Activity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,9 +23,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
-
-import java.util.ArrayList;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -89,7 +84,7 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     @Override
-    public void onActivityCreated (Bundle savedInstanceState) {
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // Indicate that this fragment would like to influence the set of actions in the action bar.
         setHasOptionsMenu(true);
@@ -106,7 +101,7 @@ public class NavigationDrawerFragment extends Fragment {
         });
         String[] menuOptions = getResources().getStringArray(R.array.menuOptions);
         //mDrawerListView.setAdapter(new ArrayAdapter<String>(getActionBar().getThemedContext(), android.R.layout.simple_list_item_1, android.R.id.text1, menuOptions));
-        mDrawerListView.setAdapter(new ArrayAdapter<String>(getActionBar().getThemedContext(), R.layout.drawer_list_item, menuOptions));
+        mDrawerListView.setAdapter(new ArrayAdapter<>(getActionBar().getThemedContext(), R.layout.drawer_list_item, menuOptions));
 
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         return mDrawerListView;
@@ -118,8 +113,8 @@ public class NavigationDrawerFragment extends Fragment {
 
     public void toggleDrawer() {
 
-        if (isDrawerOpen()) mDrawerLayout.closeDrawer(Gravity.LEFT);
-        else mDrawerLayout.openDrawer(Gravity.LEFT);
+        if (isDrawerOpen()) mDrawerLayout.closeDrawer(Gravity.START);
+        else mDrawerLayout.openDrawer(Gravity.START);
     }
 
     /**
@@ -226,11 +221,11 @@ public class NavigationDrawerFragment extends Fragment {
         mCallbacks = null;
     }
 
-    @Override
+    /*@Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         //outState.putInt(STATE_SELECTED_POSITION, mCurrentSelectedPosition);
-    }
+    }*/
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {

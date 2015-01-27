@@ -26,7 +26,6 @@ import android.widget.ListView;
 import com.androidquery.AQuery;
 import com.fsecure.lokki.avatar.AvatarLoader;
 import com.fsecure.lokki.utils.PreferenceUtils;
-import com.fsecure.lokki.utils.Utils;
 import com.makeramen.RoundedImageView;
 
 import org.json.JSONArray;
@@ -40,12 +39,20 @@ import java.util.Iterator;
 public class PlacesFragment extends Fragment {
 
     private static final String TAG = "PlacesFragment";
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            Log.e(TAG, "BroadcastReceiver onReceive");
+            showPlaces();
+        }
+    };
     private AQuery aq;
     private Context context;
     private ArrayList<String> placesList;
     private JSONObject peopleInsidePlace;
     private ListView listView;
-    private AvatarLoader avatarLoader;
 
     public PlacesFragment() {
     }
@@ -56,7 +63,7 @@ public class PlacesFragment extends Fragment {
         context = getActivity().getApplicationContext();
         View rootView = inflater.inflate(R.layout.fragment_places, container, false);
         listView = (ListView) rootView.findViewById(R.id.listView1);
-        avatarLoader = new AvatarLoader(context);
+        AvatarLoader avatarLoader = new AvatarLoader(context);
         return rootView;
 
         //listView = new ListView(getActivity());
@@ -88,16 +95,6 @@ public class PlacesFragment extends Fragment {
         super.onPause();
         LocalBroadcastManager.getInstance(context).unregisterReceiver(mMessageReceiver);
     }
-
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            Log.e(TAG, "BroadcastReceiver onReceive");
-            showPlaces();
-        }
-    };
 
     private void setListAdapter() {
 
@@ -147,8 +144,7 @@ public class PlacesFragment extends Fragment {
 
                                 if (MainApplication.avatarCache.get(email) != null) {
                                     image.setImageBitmap(MainApplication.avatarCache.get(email));
-                                }
-                                else {
+                                } else {
                                     Log.e(TAG, "Avatar not in cache, email: " + email);
                                     image.setImageResource(R.drawable.default_avatar);
                                 }
@@ -242,14 +238,16 @@ public class PlacesFragment extends Fragment {
     private void showPlaces() {
 
         Log.e(TAG, "showPlaces");
-        placesList = new ArrayList<String>();
+        placesList = new ArrayList<>();
         peopleInsidePlace = new JSONObject();
 
         try {
             if (MainApplication.places == null) { // Read them from cache
-                if (!PreferenceUtils.getValue(context, PreferenceUtils.KEY_PLACES).equals(""))
+                if (!PreferenceUtils.getValue(context, PreferenceUtils.KEY_PLACES).isEmpty()) {
                     MainApplication.places = new JSONObject(PreferenceUtils.getValue(context, PreferenceUtils.KEY_PLACES));
-                else return;
+                } else {
+                    return;
+                }
             }
 
             Log.e(TAG, "Places json: " + MainApplication.places);

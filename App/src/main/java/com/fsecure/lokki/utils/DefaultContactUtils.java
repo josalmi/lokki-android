@@ -3,7 +3,6 @@ package com.fsecure.lokki.utils;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,10 +23,10 @@ public class DefaultContactUtils implements ContactUtils {
             long contactId = emailsCursor.getLong(emailsCursor.getColumnIndex(ContactsContract.CommonDataKinds.Identity.CONTACT_ID));
 
 
-            if (email != null && !email.equals("") && !email.equals(name) && !contactsObj.has(email))
+            if (email != null && !email.isEmpty() && !email.equals(name) && !contactsObj.has(email))
                 try {
                     int i = 2;
-                    String newName = name = name.substring(0,1).toUpperCase() + name.substring(1);
+                    String newName = name = name.substring(0, 1).toUpperCase() + name.substring(1);
                     while (mapping.has(newName)) {
                         newName = name + " " + i;
                         i = i + 1;
@@ -42,7 +41,8 @@ public class DefaultContactUtils implements ContactUtils {
                     //Log.e(TAG, email + ": " + contact);
                     mapping.put(newName, email);
 
-                } catch(Exception ex) {}
+                } catch (Exception ex) {
+                }
         }
         try {
             contactsObj.put("mapping", mapping);

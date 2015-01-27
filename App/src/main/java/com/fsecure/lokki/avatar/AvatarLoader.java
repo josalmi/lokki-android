@@ -17,12 +17,42 @@ import java.lang.ref.WeakReference;
 
 public class AvatarLoader {
 
-    private Context context;
     private static final String TAG = "AvatarLoader";
+    private Context context;
 
     public AvatarLoader(Context myContext) {
 
         context = myContext;
+    }
+
+    public static boolean cancelPotentialWork(String data, ImageView imageView) {
+
+        BitmapWorkerTask task = getTaskFromView(imageView);
+
+        if (task != null) {
+            if (!task.data.equals(data)) {
+                Log.e(TAG, "cancelPotentialWork: Cancel previous task"); // Cancel previous task
+                task.cancel(true);
+            } else {
+                Log.e(TAG, "cancelPotentialWork: The same work is already in progress"); // The same work is already in progress
+                return false;
+            }
+        }
+        Log.e(TAG, "cancelPotentialWork: No task associated with the ImageView, or an existing task was cancelled"); // No task associated with the ImageView, or an existing task was cancelled
+        return true;
+    }
+
+    private static BitmapWorkerTask getTaskFromView(ImageView imageView) {
+
+        BitmapWorkerTask task = null;
+
+        if (imageView != null) {
+            //Log.e(TAG, "Tag: " + imageView.getTag());
+            if (imageView.getTag() instanceof WeakReference) {
+                task = ((WeakReference<BitmapWorkerTask>) (WeakReference) imageView.getTag()).get();
+            }
+        }
+        return task;
     }
 
     public void load(String email, ImageView imageView) {
@@ -31,10 +61,16 @@ public class AvatarLoader {
         if (cancelPotentialWork(email, imageView)) {
             Log.e(TAG, "load: Creating new task");
             final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
-            final WeakReference<BitmapWorkerTask> taskReference = new WeakReference<BitmapWorkerTask>(task);
+            final WeakReference<BitmapWorkerTask> taskReference = new WeakReference<>(task);
             imageView.setTag(taskReference);
             task.execute(email);
         }
+    }
+
+    private Bitmap processData(String email) {
+
+        Log.e(TAG, "processData");
+        return Utils.getPhotoFromEmail(context, email);
     }
 
     class BitmapWorkerTask extends AsyncTask<String, Void, Bitmap> {
@@ -44,7 +80,7 @@ public class AvatarLoader {
 
         public BitmapWorkerTask(ImageView imageView) {
             // Use a WeakReference to ensure the ImageView can be garbage collected
-            imageViewReference = new WeakReference<ImageView>(imageView);
+            imageViewReference = new WeakReference<>(imageView);
         }
 
         // Decode image in background.
@@ -78,44 +114,6 @@ public class AvatarLoader {
                 }
             }
         }
-    }
-
-    private Bitmap processData(String email) {
-
-        Log.e(TAG, "processData");
-        return Utils.getPhotoFromEmail(context, email);
-    }
-
-    public static boolean cancelPotentialWork(String data, ImageView imageView) {
-
-        BitmapWorkerTask task = getTaskFromView(imageView);
-
-        if (task != null) {
-            if (!task.data.equals(data)) {
-                Log.e(TAG, "cancelPotentialWork: Cancel previous task"); // Cancel previous task
-                task.cancel(true);
-            } else {
-                Log.e(TAG, "cancelPotentialWork: The same work is already in progress"); // The same work is already in progress
-                return false;
-            }
-        }
-        Log.e(TAG, "cancelPotentialWork: No task associated with the ImageView, or an existing task was cancelled"); // No task associated with the ImageView, or an existing task was cancelled
-        return true;
-    }
-
-    private static BitmapWorkerTask getTaskFromView(ImageView imageView) {
-
-        BitmapWorkerTask task = null;
-
-        if (imageView != null) {
-            //Log.e(TAG, "Tag: " + imageView.getTag());
-            if (imageView.getTag() instanceof WeakReference) {
-                final WeakReference<BitmapWorkerTask> taskReference = (WeakReference<BitmapWorkerTask>) imageView.getTag();
-                if (taskReference != null)
-                    task = taskReference.get();
-            }
-        }
-        return task;
     }
 
 }

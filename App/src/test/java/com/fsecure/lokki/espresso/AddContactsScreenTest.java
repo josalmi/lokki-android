@@ -1,10 +1,7 @@
 package com.fsecure.lokki.espresso;
 
 import android.content.Context;
-import android.test.ActivityInstrumentationTestCase2;
-import android.test.InstrumentationTestCase;
 
-import com.fsecure.lokki.MainActivity;
 import com.fsecure.lokki.R;
 import com.fsecure.lokki.utils.ContactUtils;
 
@@ -16,21 +13,19 @@ import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
-import static android.support.test.espresso.matcher.ViewMatchers.isRoot;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.core.AnyOf.anyOf;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 public class AddContactsScreenTest extends MainActivityBaseTest {
 
-    private String testContactJson = "{\"test.friend@email.com\": {\"id\": 1,\"name\": \"Test Friend\"}," +
-                                     "\"family.member@mail.com\": {\"id\": 2, \"name\": \"Family Member\"}," +
-                                     "\"work.buddy@work.com\": {\"id\": 3,\"name\": \"Work Buddy\"}," +
-                                     "\"mapping\": {\"Test Friend\": \"test.friend@email.com\"," +
-                                                   "\"Family Member\": \"family.member@mail.com\"," +
-                                                   "\"Work Buddy\": \"work.buddy@work.com\"}}";
+    private static final String testContactJson = "{\"test.friend@email.com\": {\"id\": 1,\"name\": \"Test Friend\"}," +
+            "\"family.member@mail.com\": {\"id\": 2, \"name\": \"Family Member\"}," +
+            "\"work.buddy@work.com\": {\"id\": 3,\"name\": \"Work Buddy\"}," +
+            "\"mapping\": {\"Test Friend\": \"test.friend@email.com\"," +
+            "\"Family Member\": \"family.member@mail.com\"," +
+            "\"Work Buddy\": \"work.buddy@work.com\"}}";
 
 
     @Override
@@ -54,9 +49,6 @@ public class AddContactsScreenTest extends MainActivityBaseTest {
     }
 
 
-
-
-
     // TEST
 
     public void testContactListScreenIsDisplayed() {
@@ -74,8 +66,6 @@ public class AddContactsScreenTest extends MainActivityBaseTest {
         // TODO: hardcoded text
         onView(withText("Family Member")).check(matches(isDisplayed()));
     }
-
-
 
 
 }

@@ -7,7 +7,6 @@ package com.fsecure.lokki.utils;
 import android.app.NotificationManager;
 import android.content.ContentUris;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -24,7 +23,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
-
 import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.v4.app.NotificationCompat;
@@ -90,17 +88,16 @@ public class Utils {
     }
 
 
-
     public static String getDeviceId() {
 
         return "35" + //we make this look like a valid IMEI
-                Build.BOARD.length()%10 + Build.BRAND.length()%10 +
-                Build.CPU_ABI.length()%10 + Build.DEVICE.length()%10 +
-                Build.DISPLAY.length()%10 + Build.HOST.length()%10 +
-                Build.ID.length()%10 + Build.MANUFACTURER.length()%10 +
-                Build.MODEL.length()%10 + Build.PRODUCT.length()%10 +
-                Build.TAGS.length()%10 + Build.TYPE.length()%10 +
-                Build.USER.length()%10; //13 digits
+                Build.BOARD.length() % 10 + Build.BRAND.length() % 10 +
+                Build.CPU_ABI.length() % 10 + Build.DEVICE.length() % 10 +
+                Build.DISPLAY.length() % 10 + Build.HOST.length() % 10 +
+                Build.ID.length() % 10 + Build.MANUFACTURER.length() % 10 +
+                Build.MODEL.length() % 10 + Build.PRODUCT.length() % 10 +
+                Build.TAGS.length() % 10 + Build.TYPE.length() % 10 +
+                Build.USER.length() % 10; //13 digits
     }
 
     public static Boolean loadContacts(Context context) {
@@ -109,7 +106,7 @@ public class Utils {
         if (MainApplication.contacts != null) return true;
 
         String jsonData = PreferenceUtils.getValue(context, PreferenceUtils.KEY_CONTACTS);
-        if (!jsonData.equals(""))
+        if (!jsonData.isEmpty())
             try {
                 MainApplication.contacts = new JSONObject(jsonData);
                 MainApplication.mapping = MainApplication.contacts.getJSONObject("mapping");
@@ -158,10 +155,9 @@ public class Utils {
         }
 
         Log.e(TAG, "getNameFromEmail - Name queried: " + email);
-        Cursor emailCursor = context.getContentResolver().query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null, ContactsContract.CommonDataKinds.Email.DATA + "='" + email + "'" , null, null);
+        Cursor emailCursor = context.getContentResolver().query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null, ContactsContract.CommonDataKinds.Email.DATA + "='" + email + "'", null, null);
         if (emailCursor == null) return "???";
-        while (emailCursor.moveToNext())
-        {
+        if (emailCursor.moveToNext()) {
             String name = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DISPLAY_NAME_PRIMARY));
             Log.e(TAG, "getNameFromEmail - Email: " + email + ", Name: " + name);
             return name;
@@ -190,10 +186,9 @@ public class Utils {
             }
         } else {
             Log.e(TAG, "getPhotoFromEmail - id queried: " + email);
-            Cursor emailCursor = context.getContentResolver().query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null, ContactsContract.CommonDataKinds.Email.DATA + "='" + email + "'" , null, null);
+            Cursor emailCursor = context.getContentResolver().query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null, ContactsContract.CommonDataKinds.Email.DATA + "='" + email + "'", null, null);
             //if (emailCursor == null) return null;
-            while (emailCursor!= null && emailCursor.moveToNext())
-            {
+            while (emailCursor != null && emailCursor.moveToNext()) {
                 Long contactId = Long.valueOf(emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.CONTACT_ID)));
                 result = openPhoto(context, contactId);
                 //MainApplication.avatarCache.put(email, result);
@@ -201,14 +196,14 @@ public class Utils {
             }
         }
         //if (result != null) MainApplication.avatarCache.put(email, result);
-        if (result == null) result = Utils.getDefaultAvatarInitials(getNameFromEmail(context, email));
+        if (result == null)
+            result = Utils.getDefaultAvatarInitials(getNameFromEmail(context, email));
 
         MainApplication.avatarCache.put(email, result);
         return result;
     }
 
-    public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, float pixels)
-    {
+    public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, float pixels) {
         if (bitmap == null) {
             Log.e(TAG, "getRoundedCornerBitmap - null bitmap");
             return null;
@@ -230,13 +225,13 @@ public class Utils {
         return output;
     }
 
-    public static Bitmap decodeFile(byte[] f){
+    public static Bitmap decodeFile(byte[] f) {
 
         Log.e(TAG, "decodeFile");
         //Decode image size
         BitmapFactory.Options o = new BitmapFactory.Options();
         o.inJustDecodeBounds = true;
-        BitmapFactory.decodeStream(new ByteArrayInputStream(f),null,o);
+        BitmapFactory.decodeStream(new ByteArrayInputStream(f), null, o);
 
         //The new size we want to scale to
         final int REQUIRED_SIZE = 60;
@@ -260,7 +255,7 @@ public class Utils {
         Uri contactUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
         Uri photoUri = Uri.withAppendedPath(contactUri, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
         //Log.e(TAG, "Id: " + contactId + " - PhotoUri: " + photoUri);
-        Cursor cursor = context.getContentResolver().query(photoUri, new String[] {ContactsContract.Contacts.Photo.PHOTO}, null, null, null);
+        Cursor cursor = context.getContentResolver().query(photoUri, new String[]{ContactsContract.Contacts.Photo.PHOTO}, null, null, null);
         if (cursor == null) {
             return null;
         }
@@ -296,14 +291,15 @@ public class Utils {
         return true;
     }
 
-    public static String getAppVersion(Context context) throws PackageManager.NameNotFoundException {
+    public static String getAppVersion(Context context) {
 
         PackageManager packageManager = context.getPackageManager();
         try {
             PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
             Log.e(TAG, "getAppVersion: " + packageInfo.versionName);
             return packageInfo.versionName;
-        } catch (PackageManager.NameNotFoundException ex) {} catch(Exception e){}
+        } catch (Exception ex) {
+        }
         return "";
     }
 
@@ -326,7 +322,7 @@ public class Utils {
         return Locale.getDefault().getLanguage();
     }
 
-    public static Bitmap getDefaultAvatarInitials(String text){
+    public static Bitmap getDefaultAvatarInitials(String text) {
 
         Log.e(TAG, "getDefaultAvatarInitials");
 
@@ -352,7 +348,7 @@ public class Utils {
     private static String getInitials(String text) {
 
         String result = "NN";
-        if (!text.equals("") && text != null) {
+        if (text != null && !text.isEmpty()) {
             String[] nameParts = text.split(" ");
             result = nameParts[0].substring(0, 1).toUpperCase();
             if (nameParts.length > 1)

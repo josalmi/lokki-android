@@ -15,10 +15,8 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxStatus;
 import com.fsecure.lokki.utils.PreferenceUtils;
-import com.fsecure.lokki.utils.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,14 +27,11 @@ public class DataService extends Service {
     private static final String ALARM_TIMER = "ALARM_TIMER";
     private static final String TAG = "DataService";
     private static final String GET_PLACES = "GET_PLACES";
-
-    private AQuery aq;
+    private static Boolean serviceRunning = false;
     private AlarmManager alarm;
     private PendingIntent alarmCallback;
-    private static Boolean serviceRunning = false;
 
-
-    public static void start(Context context){
+    public static void start(Context context) {
 
         Log.e(TAG, "start Service called");
         if (serviceRunning) { // If service is running, no need to start it again.
@@ -46,7 +41,7 @@ public class DataService extends Service {
         context.startService(new Intent(context, DataService.class));
     }
 
-    public static void stop(Context context){
+    public static void stop(Context context) {
 
         Log.e(TAG, "stop Service called");
         context.stopService(new Intent(context, DataService.class));
@@ -68,7 +63,7 @@ public class DataService extends Service {
         context.startService(placesIntent);
     }
 
-    public static void updateDashboard(Context context, Location location){
+    public static void updateDashboard(Location location) {
 
         Log.e(TAG, "updateDashboard");
         if (MainApplication.dashboard != null)
@@ -96,7 +91,6 @@ public class DataService extends Service {
 
         Log.e(TAG, "onCreate");
         super.onCreate();
-        aq = new AQuery(this);
         setTimer();
         serviceRunning = true;
         try {
@@ -113,7 +107,7 @@ public class DataService extends Service {
         Intent alarmIntent = new Intent(this, DataService.class);
         alarmIntent.putExtra(ALARM_TIMER, 1);
         alarmCallback = PendingIntent.getService(this, 0, alarmIntent, 0);
-        alarm.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 0, 30*1000, alarmCallback);
+        alarm.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 0, 30 * 1000, alarmCallback);
         Log.e(TAG, "Timer created.");
     }
 
@@ -122,7 +116,7 @@ public class DataService extends Service {
 
         Log.e(TAG, "onStartCommand invoked");
 
-        if (intent != null ) { // Check that intent isnt null, and service is connected to Google Play Services
+        if (intent != null) { // Check that intent isnt null, and service is connected to Google Play Services
             Bundle extras = intent.getExtras();
 
             if (extras != null && extras.containsKey(ALARM_TIMER)) {
@@ -149,11 +143,11 @@ public class DataService extends Service {
         ServerAPI.getDashboard(this, "dashboardCallback");
     }
 
-    public void placesCallback(String url, JSONObject json, AjaxStatus status){
+    public void placesCallback(JSONObject json, AjaxStatus status) {
 
         Log.e(TAG, "placesCallback");
 
-        if (json != null){
+        if (json != null) {
             Log.e(TAG, "json returned: " + json);
             MainApplication.places = json;
             PreferenceUtils.setValue(this, PreferenceUtils.KEY_PLACES, json.toString());
@@ -165,7 +159,7 @@ public class DataService extends Service {
         }
     }
 
-    public void dashboardCallback(String url, JSONObject json, AjaxStatus status){
+    public void dashboardCallback(JSONObject json, AjaxStatus status) {
 
         Log.e(TAG, "dashboardCallback");
 
@@ -175,7 +169,7 @@ public class DataService extends Service {
             Intent intent = new Intent("EXIT");
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
-        } else if (json != null){
+        } else if (json != null) {
             Log.e(TAG, "json returned: " + json);
             MainApplication.dashboard = json;
             PreferenceUtils.setValue(this, PreferenceUtils.KEY_DASHBOARD, json.toString());

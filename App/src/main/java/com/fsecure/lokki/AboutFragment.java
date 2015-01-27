@@ -4,12 +4,9 @@ See LICENSE for details
 */
 package com.fsecure.lokki;
 
-import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -29,8 +26,6 @@ public class AboutFragment extends Fragment {
     private AQuery aq;
     private String[] aboutLinksUrls;
 
-    public AboutFragment() {}
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -46,14 +41,15 @@ public class AboutFragment extends Fragment {
 
         aboutLinksUrls = getResources().getStringArray(R.array.about_links_url);
         String[] aboutLinks = getResources().getStringArray(R.array.about_links);
-        aq.id(R.id.listView1).adapter(new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, aboutLinks));
+        aq.id(R.id.listView1).adapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, aboutLinks));
         aq.id(R.id.listView1).itemClicked(this, "onItemSelected");
-        try{
+        try {
             aq.id(R.id.version).text("Version: " + Utils.getAppVersion(getActivity()) + getResources().getString(R.string.version_and_copyright));
-        } catch(Exception ex) {}
+        } catch (Exception ex) {
+        }
     }
 
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+    public void onItemSelected(AdapterView<?> parent, int position) {
 
         Log.e(TAG, "onItemSelected: " + position + ", tag:" + parent.getTag());
         String url = aboutLinksUrls[position];
@@ -76,7 +72,8 @@ public class AboutFragment extends Fragment {
                     intent.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.share_text));
                     startActivity(Intent.createChooser(intent, getResources().getString(R.string.share)));
 
-                } catch (ActivityNotFoundException anfe) { }
+                } catch (ActivityNotFoundException anfe) {
+                }
                 break;
 
         }

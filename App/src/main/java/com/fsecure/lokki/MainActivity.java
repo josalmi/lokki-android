@@ -31,7 +31,6 @@ import com.fsecure.lokki.apprater.AppRater;
 import com.fsecure.lokki.utils.ContactUtils;
 import com.fsecure.lokki.utils.DefaultContactUtils;
 import com.fsecure.lokki.utils.PreferenceUtils;
-import com.fsecure.lokki.utils.Utils;
 
 import org.json.JSONException;
 
@@ -42,20 +41,44 @@ import java.util.Set;
 public class MainActivity extends ActionBarActivity implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
     private static final String TAG = "MainActivity";
+    private BroadcastReceiver exitMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.e(TAG, "exitMessageReceiver onReceive");
 
+            LocationService.stop(MainActivity.this.getApplicationContext());
+            DataService.stop(MainActivity.this.getApplicationContext());
+
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+            alertDialog.setTitle(context.getResources().getString(R.string.app_name));
+            String message = context.getResources().getString(R.string.security_signup);
+            message = message + " " + MainApplication.userAccount;
+            alertDialog.setMessage(message)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            finish();
+                        }
+                    })
+                    .setCancelable(false);
+            try {
+                alertDialog.show();
+
+            } catch (Exception ex) {
+
+            }
+        }
+    };
     private static final int REQUEST_CODE_EMAIL = 1001;
     private static final int REQUEST_TERMS = 1002;
     private static final int SIGNUP_CONTINUE = 1003;
-
+    // TODO: make non static, put in shared prefs
+    public static Boolean firstTimeLaunch;
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private CharSequence mTitle;
     private int selectedOption = 0;
-
     private ContactUtils mContactUtils;
-
-    // TODO: make non static, put in shared prefs
-    public static Boolean firstTimeLaunch;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,17 +110,14 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
 
         } else {
             //getSupportActionBar().setIcon(R.drawable.icon_action_menu);
-            checkIfUserisLoggedIn(); // Log user In
+            checkIfUserIsLoggedIn(); // Log user In
             //GCMHelper.start(getApplicationContext()); // Register to GCM
         }
     }
 
     private boolean firstTimeLaunch() {
 
-        String authorizationToken = PreferenceUtils.getValue(this, PreferenceUtils.KEY_AUTH_TOKEN);
-        if (authorizationToken.equals(""))
-            return true;
-        return false;
+        return PreferenceUtils.getValue(this, PreferenceUtils.KEY_AUTH_TOKEN).isEmpty();
     }
 
     @Override
@@ -141,14 +161,14 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
 
     }
 
-    private void checkIfUserisLoggedIn() {
+    private void checkIfUserIsLoggedIn() {
 
         String userAccount = PreferenceUtils.getValue(this, PreferenceUtils.KEY_USER_ACCOUNT);
         String userId = PreferenceUtils.getValue(this, PreferenceUtils.KEY_USER_ID);
         String authorizationToken = PreferenceUtils.getValue(this, PreferenceUtils.KEY_AUTH_TOKEN);
         boolean debug = false;
 
-        if (debug || userId.equals("") || userAccount.equals("") || authorizationToken.equals(""))
+        if (debug || userId.isEmpty() || userAccount.isEmpty() || authorizationToken.isEmpty()) {
             try {
                 startActivityForResult(new Intent(this, SignupActivity.class), REQUEST_CODE_EMAIL);
                 /*
@@ -160,7 +180,7 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
                 Toast.makeText(this, getResources().getString(R.string.general_error), Toast.LENGTH_LONG).show();
                 finish();
             }
-        else { // User already logged-in
+        } else { // User already logged-in
             MainApplication.userAccount = userAccount;
             MainApplication.userId = userId;
             getSupportActionBar().setIcon(R.drawable.icon_action_menu);
@@ -181,7 +201,7 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         selectedOption = position;
         getSupportActionBar().setTitle(mTitle);
 
-        switch(position) {
+        switch (position) {
             case 0: // Map
                 fragmentManager.beginTransaction().replace(R.id.container, new FragmentTabsFragmentSupport()).commit();
                 break;
@@ -220,7 +240,6 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         return true;
     }
 
-
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
 
@@ -256,7 +275,8 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
 
             case R.id.add_people: // In Contacts (to add new ones)
                 FragmentManager fragmentManager = getSupportFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.container, new AddContactsFragment(mContactUtils)).commit();
+
+                fragmentManager.beginTransaction().replace(R.id.container, AddContactsFragment.newInstance(mContactUtils)).commit();
                 selectedOption = -10;
                 supportInvalidateOptionsMenu();
                 break;
@@ -291,26 +311,22 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
                 LocationService.start(MainActivity.this);
                 ServerAPI.setVisibility(MainActivity.this, true);
                 Toast.makeText(this, getResources().getString(R.string.you_are_visible), Toast.LENGTH_LONG).show();
-            }
-            else {
+            } else {
                 LocationService.stop(MainActivity.this);
                 ServerAPI.setVisibility(MainActivity.this, false);
                 Toast.makeText(this, getResources().getString(R.string.you_are_invisible), Toast.LENGTH_LONG).show();
             }
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
         supportInvalidateOptionsMenu();
     }
 
-
-
-
     // TODO: implement back button logic in onBackPressed()
     @Override
     public boolean onKeyUp(int keycode, KeyEvent e) {
-        switch(keycode) {
+        switch (keycode) {
             case KeyEvent.KEYCODE_MENU:
                 mNavigationDrawerFragment.toggleDrawer();
                 return true;
@@ -404,8 +420,8 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
                     e.printStackTrace();
                 }
             else if (MainApplication.iDontWantToSee.has(email)) {
-                 MainApplication.iDontWantToSee.remove(email);
-                 PreferenceUtils.setValue(this, PreferenceUtils.KEY_I_DONT_WANT_TO_SEE, MainApplication.iDontWantToSee.toString());
+                MainApplication.iDontWantToSee.remove(email);
+                PreferenceUtils.setValue(this, PreferenceUtils.KEY_I_DONT_WANT_TO_SEE, MainApplication.iDontWantToSee.toString());
             }
         }
     }
@@ -425,7 +441,7 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
                 }
             else
                 try {
-                    Set<String> emails = new HashSet<String>();
+                    Set<String> emails = new HashSet<>();
                     emails.add(email);
                     ServerAPI.allowPeople(this, emails);
                 } catch (JSONException e) {
@@ -434,37 +450,6 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         }
 
     }
-
-    private BroadcastReceiver exitMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.e(TAG, "exitMessageReceiver onReceive");
-
-            LocationService.stop(MainActivity.this.getApplicationContext());
-            DataService.stop(MainActivity.this.getApplicationContext());
-
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
-            alertDialog.setTitle(context.getResources().getString(R.string.app_name));
-            String message = context.getResources().getString(R.string.security_signup);
-            message = message + " " + MainApplication.userAccount;
-            alertDialog.setMessage(message)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                            finish();
-                        }
-                    })
-                    .setCancelable(false);
-            try {
-                alertDialog.show();
-
-            } catch (Exception ex) {
-
-            }
-        }
-    };
-
 
     // For dependency injection
     public void setContactUtils(ContactUtils contactUtils) {

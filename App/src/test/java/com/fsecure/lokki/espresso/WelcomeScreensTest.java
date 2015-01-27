@@ -1,9 +1,6 @@
 package com.fsecure.lokki.espresso;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.LargeTest;
 
 import com.fsecure.lokki.MainActivity;
 import com.fsecure.lokki.R;
@@ -48,7 +45,6 @@ public class WelcomeScreensTest extends ActivityInstrumentationTestCase2<MainAct
         onView(withText(R.string.i_agree)).perform(click());
         onView(withText(R.string.signup_explanation)).check(matches(isDisplayed()));
     }
-
 
 
 }

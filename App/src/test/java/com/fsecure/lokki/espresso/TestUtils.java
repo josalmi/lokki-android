@@ -34,7 +34,7 @@ public class TestUtils {
     }
 
 
-    public static ViewAction clickScreenPosition(final int x, final int y){
+    public static ViewAction clickScreenPosition(final int x, final int y) {
         return new GeneralClickAction(
                 Tap.SINGLE,
                 new CoordinatesProvider() {
@@ -46,9 +46,7 @@ public class TestUtils {
 
                         final float screenX = screenPos[0] + x;
                         final float screenY = screenPos[1] + y;
-                        float[] coordinates = {screenX, screenY};
-
-                        return coordinates;
+                        return new float[]{screenX, screenY};
                     }
                 },
                 Press.FINGER);

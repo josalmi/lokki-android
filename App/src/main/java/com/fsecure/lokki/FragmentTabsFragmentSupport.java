@@ -20,6 +20,15 @@ import android.view.ViewGroup;
 public class FragmentTabsFragmentSupport extends Fragment {
 
     public static final String TAG = "FragmentTabsFragmentSupport";
+    private BroadcastReceiver trackUserBroadcastReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            Log.e(TAG, "BroadcastReceiver onReceive");
+            tabHost.setCurrentTab(0);
+        }
+    };
     private FragmentTabHost tabHost;
 
     @Override
@@ -56,14 +65,4 @@ public class FragmentTabsFragmentSupport extends Fragment {
         super.onPause();
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(trackUserBroadcastReceiver);
     }
-
-    private BroadcastReceiver trackUserBroadcastReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            Log.e(TAG, "BroadcastReceiver onReceive");
-            tabHost.setCurrentTab(0);
-        }
-    };
 }

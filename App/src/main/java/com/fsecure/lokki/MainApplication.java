@@ -11,7 +11,6 @@ import android.os.StrictMode;
 import android.support.v4.util.LruCache;
 import android.util.Log;
 
-
 import com.fsecure.lokki.utils.PreferenceUtils;
 import com.fsecure.lokki.utils.Utils;
 import com.google.android.gms.maps.GoogleMap;
@@ -23,12 +22,6 @@ public class MainApplication extends Application {
     private static final boolean DEVELOPER_MODE = true;
 
     private static final String TAG = "MainApplication";
-
-
-    // TODO: gtfo static globals :(
-    static int[] mapTypes = {GoogleMap.MAP_TYPE_NORMAL, GoogleMap.MAP_TYPE_SATELLITE, GoogleMap.MAP_TYPE_HYBRID};
-    static int mapType = 0;
-    static Boolean showPlaces = false;
     public static String emailBeingTracked;
     public static JSONObject dashboard = null;
     public static String userId; // Id for REST requests
@@ -39,6 +32,10 @@ public class MainApplication extends Application {
     public static Boolean visible = true;
     public static LruCache<String, Bitmap> avatarCache;
     public static JSONObject places;
+    // TODO: gtfo static globals :(
+    static int[] mapTypes = {GoogleMap.MAP_TYPE_NORMAL, GoogleMap.MAP_TYPE_SATELLITE, GoogleMap.MAP_TYPE_HYBRID};
+    static int mapType = 0;
+    static Boolean showPlaces = false;
     public Boolean exitApp = false;
 
     @Override
@@ -46,10 +43,6 @@ public class MainApplication extends Application {
 
         Log.e(TAG, "Lokki started component");
         loadSetting();
-
-        ErrorHandler errorHandler = new ErrorHandler();
-        //Thread.setDefaultUncaughtExceptionHandler(errorHandler);
-        //avatarCache = new LruCache<String, Bitmap>(30);
 
         final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024); // Use 1/8th of the available memory for this memory cache.
         final int cacheSize = maxMemory / 8;
@@ -63,10 +56,11 @@ public class MainApplication extends Application {
         };
 
         String iDontWantToSeeString = PreferenceUtils.getValue(this, PreferenceUtils.KEY_I_DONT_WANT_TO_SEE);
-        if (!iDontWantToSeeString.equals("")) {
+        if (!iDontWantToSeeString.isEmpty()) {
             try {
                 MainApplication.iDontWantToSee = new JSONObject(iDontWantToSeeString);
-            } catch (Exception ex) {}
+            } catch (Exception ex) {
+            }
         } else {
             MainApplication.iDontWantToSee = new JSONObject();
         }
@@ -81,7 +75,7 @@ public class MainApplication extends Application {
 
             StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
                     .detectLeakedSqlLiteObjects()
-                    //.detectLeakedClosableObjects()
+                            //.detectLeakedClosableObjects()
                     .penaltyLog()
                     .penaltyDeath()
                     .build());
@@ -121,7 +115,7 @@ public class MainApplication extends Application {
             LocationService.stop(MainApplication.this);
             DataService.stop(MainApplication.this);
 
-            try{
+            try {
                 String osType = "Android " + Build.VERSION.SDK_INT;
                 String appVersion = Utils.getAppVersion(MainApplication.this);
                 String reportData = ex.getMessage();
@@ -131,7 +125,7 @@ public class MainApplication extends Application {
                 ServerAPI.reportCrash(MainApplication.this, osType, appVersion, reportTitle, reportData);
                 Log.e(TAG, "Data sent to server");
 
-            } catch(Exception exception) {
+            } catch (Exception exception) {
                 Log.e(TAG, "Exception during the error reporting: " + exception.getMessage());
                 exception.printStackTrace();
             }
