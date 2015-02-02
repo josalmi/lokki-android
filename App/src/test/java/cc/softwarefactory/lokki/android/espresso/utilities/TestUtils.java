@@ -44,9 +44,9 @@ public class TestUtils {
     }
 
 
-    public static ViewAction clickScreenPosition(final int x, final int y) {
+    public static ViewAction clickScreenPosition(final int x, final int y, Tap tapType) {
         return new GeneralClickAction(
-                Tap.SINGLE,
+                tapType,
                 new CoordinatesProvider() {
                     @Override
                     public float[] calculateCoordinates(View view) {
@@ -62,8 +62,13 @@ public class TestUtils {
                 Press.FINGER);
     }
 
+    public static ViewAction clickScreenPosition(final int x, final int y) {
+        return clickScreenPosition(x, y, Tap.SINGLE);
+    }
+
     public static void toggleNavigationDrawer() {
         // TODO: hardcoded click position and menu text
         onView(withId(R.id.decor_content_parent)).perform(clickScreenPosition(0, 0));
     }
+
 }
