@@ -24,7 +24,8 @@
             android:ellipsize="end"
             android:gravity="center_vertical"
             android:scrollHorizontally="true"
-            android:layout_height="wrap_content"></LinearLayout>
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"></LinearLayout>
     </HorizontalScrollView>
 
     <TextView

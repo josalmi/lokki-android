@@ -284,10 +284,7 @@ public class MapViewFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             Log.e(TAG, "BroadcastReceiver onReceive");
             Bundle extras = intent.getExtras();
-            if (extras != null && extras.containsKey("current-location")) {
-                //    new UpdateMap().execute(0); // Only user
-            } else {
-                //    new UpdateMap().execute(1); // Only others (not user)
+            if (extras == null || !extras.containsKey("current-location")) {
                 new UpdateMap().execute(2); // All users
             }
         }

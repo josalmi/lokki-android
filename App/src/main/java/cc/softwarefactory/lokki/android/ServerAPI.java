@@ -156,7 +156,7 @@ public class ServerAPI {
         aq.post(url, JSONdata, JSONObject.class, cb);
     }
 
-    public static void disallowUser(final Context context, String email) throws JSONException {
+    public static void disallowUser(final Context context, String email) {
 
         Log.e(TAG, "disallowUser");
         AQuery aq = new AQuery(context);
@@ -380,7 +380,7 @@ public class ServerAPI {
         aq.post(url, JSONdata, JSONObject.class, cb);
     }
 
-    public static void removePlace(final Context context, final String placeId) throws JSONException {
+    public static void removePlace(final Context context, final String placeId) {
 
         Log.e(TAG, "removePlace");
         AQuery aq = new AQuery(context);

@@ -8,7 +8,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 10
+        minSdkVersion 17
         targetSdkVersion 21
         versionCode 325
         versionName "3.2.5"
@@ -53,9 +53,9 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:21.0.+'
+    compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.google.android.gms:play-services:6.1.11'
-    compile 'com.makeramen:roundedimageview:1.2.+'
+    compile 'com.makeramen:roundedimageview:1.2.4'
     compile files('libs/android-query.0.26.7.jar')
 
     compile 'com.android.support:support-annotations:21.0.3'

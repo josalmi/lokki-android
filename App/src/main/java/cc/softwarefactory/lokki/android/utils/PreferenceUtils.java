@@ -35,7 +35,7 @@ public class PreferenceUtils {
         }
 
         SharedPreferences prefs = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
-        prefs.edit().putString(key, value).commit();
+        prefs.edit().putString(key, value).apply();
     }
 
 }

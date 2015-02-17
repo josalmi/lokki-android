@@ -408,11 +408,7 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
             String email = (String) checkBox.getTag();
             Log.e(TAG, "toggleUserCanSeeMe: " + email + ", Checkbox is: " + allow);
             if (!allow) {
-                try {
-                    ServerAPI.disallowUser(this, email);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+                ServerAPI.disallowUser(this, email);
             } else {
                 try {
                     Set<String> emails = new HashSet<String>();
